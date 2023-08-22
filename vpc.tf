@@ -1,43 +1,43 @@
-#provider
+# Provider
 provider "aws" {
-    region = "ap-south-1"  
+  region = "ap-south-1"
 }
-#VPC CREATION
-resource "aws_vpc" "my_vpc" {
-  cidr_block       = "10.0.0.0/16"
+# VPC
+resource "aws_vpc" "vpc" {
+  cidr_block = var.vpc_cidr
   enable_dns_hostnames = true
-tags = {
+  tags = {
     Name = "demo_vpc"
   }
 }
-#IGW FOR DEMO
-resource "aws_internet_gateway" "my_igw" {
-  vpc_id = aws_vpc.my_vpc.id
-
+# IGW for demo_vpc
+resource "aws_internet_gateway" "vpc_igw" {
+  vpc_id = aws_vpc.vpc.id
   tags = {
-    Name = "demo_igw"
+    Name = "demo_vpc_igw"
   }
 }
-#SUBNETS
+
+# Subenets in demo_vpc
 resource "aws_subnet" "subnets" {
-    count       = length(var.subnets_cidr)
-    vpc_id     = aws_vpc.my_vpc.id
-    cidr_block = element(var.subnets_cidr, count.index)  
-    availability_zone = element(var.availability_zones, coun.index)
-    map_piblic_ip_on_launch = true
-tags = {
-    Name = "demo_subnet_${count.index + 1}"
+  count                   = length(var.subnets_cidr)
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = element(var.subnets_cidr, count.index)
+  availability_zone       = element(var.availability_zones, count.index)
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "demo_vpc_subnet_${count.index + 1}"
   }
 }
 # Route table for demo_vpc
 resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.my_vpc.id
+  vpc_id = aws_vpc.vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.my_igw.id
+    gateway_id = aws_internet_gateway.vpc_igw.id
   }
   tags = {
-    Name = "public_rt"
+    Name = "demo_vpc_public_rt"
   }
 }
 
@@ -47,5 +47,4 @@ resource "aws_route_table_association" "rt_sub_association" {
   subnet_id      = element(aws_subnet.subnets.*.id, count.index)
   route_table_id = aws_route_table.public_rt.id
 }
-
 
