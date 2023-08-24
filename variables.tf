@@ -13,7 +13,7 @@ variable "subnets_cidr" {
 }
 variable "availability_zones" {
   type    = list(string)
-  default = ["ap-south-1a", "ap-south-1b", ap-south-1c]
+  default = ["ap-south-1a", "ap-south-1b"]
 }
 variable "ubuntuami" {
   default = "ami-0f5ee92e2d63afc18"
